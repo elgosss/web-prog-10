@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Задание 1</title>
+        <style>
+            
+        </style>
+    </head>
+    <body>
+        <div id="main_1">
+            <script>
+                "use strict";
+                class ssd_drive {
+                    constructor(volume, intface, chips, controller) {
+                        this.volume = volume;
+                        this.intface = intface;
+                        this["type of Flash chips"] = chips;
+                        this.controller = controller;
+                    }
+                    info() {
+                        document.write(`<p><b>SSD диск</b><br> Объем: ${this.volume}<br> Интерфейс: ${this.intface}<br> Тип микросхем Flash: ${this["type of Flash chips"]}<br>
+                            Контроллер: ${this.controller}</p>`);
+                    }
+                    get Volume() { return this.volume; }
+                    set Volume(val) { this.volume = val; }
+                    get Intface() { return this.intface; }
+                    set Intface(val) { this.intface = val; }
+                    get Chips() { return this["type of Flash chips"]; }
+                    set Chips(val) { this["type of Flash chips"] = val; }
+                    get Controller() { return this.controller; }
+                    set Controller(val) { this.controller = val; }
+                }
+
+                let arrObjects = [];
+                arrObjects[0] = new ssd_drive('240 ГБ', 'SATA 3', '3D TLC NAND', 'Marvell 88NV1120');
+                arrObjects[1] = new ssd_drive('1 ТБ', 'USB 3.0', '3D TLC NAND', 'Phison');
+                arrObjects[2] = new ssd_drive('1 ТБ', 'M.2 PCI-E 4.0 x4', '3D TLC NAND', 'Samsung Phoenix');
+                arrObjects[3] = new ssd_drive('1 ТБ', 'M.2 PCI-E 3.0 x4', '3D V-NAND', 'Samsung Pablo');
+                arrObjects[4] = new ssd_drive('256 ГБ', 'M.2 PCI-E 3.0 x4', '3D TLC NAND', 'Silicon Motion SM2263XT');
+
+                let property = ['Объем', 'Интерфейс', 'Тип микросхем Flash', 'Контроллер', 'Дата выхода на рынок', 'Стоимость'];
+                
+                let jsonArray = JSON.stringify(arrObjects);
+                console.log(jsonArray);
+
+            </script>
+        </div>
+    </body>
+</html>
