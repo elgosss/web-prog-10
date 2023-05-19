@@ -3,12 +3,40 @@
     <head>
         <meta charset="UTF-8">
         <title>Задание 1</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
         <style>
-            
+            table {
+                border-collapse: collapse;
+                border: 3px solid black;
+                font-size: 16px;
+                text-align: center;
+                table-layout: fixed;
+                width: 850px;
+            }
+            td {
+                border: 1px solid black;
+                padding: 3px;
+            }
+            .th {
+                background-color: #AFCDE7;
+                border: 1px solid black;
+            }
         </style>
     </head>
     <body>
         <div id="main_1">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="th">Объем</th>
+                        <th class="th">Интерфейс</th>
+                        <th class="th">Тип микросхем Flash</th>
+                        <th class="th">Контроллер</th>
+                    </tr>
+                </thead>
+                <tbody id="table">
+                </tbody>
+            </table>
             <script>
                 "use strict";
                 class ssd_drive {
@@ -39,11 +67,18 @@
                 arrObjects[3] = new ssd_drive('1 ТБ', 'M.2 PCI-E 3.0 x4', '3D V-NAND', 'Samsung Pablo');
                 arrObjects[4] = new ssd_drive('256 ГБ', 'M.2 PCI-E 3.0 x4', '3D TLC NAND', 'Silicon Motion SM2263XT');
 
-                let property = ['Объем', 'Интерфейс', 'Тип микросхем Flash', 'Контроллер', 'Дата выхода на рынок', 'Стоимость'];
-                
-                let jsonArray = JSON.stringify(arrObjects);
-                console.log(jsonArray);
+                localStorage.setItem('ssd', JSON.stringify(arrObjects));
 
+                let ssd = JSON.parse(localStorage.getItem('ssd'));
+
+                $.each(ssd, function(key, value){
+                    $('tbody').append(`<tr>
+                    <td>${value.volume}</td>
+                    <td>${value.intface}</td>
+                    <td>${value["type of Flash chips"]}</td>
+                    <td>${value.controller}</td>
+                    </tr>`)
+                })
             </script>
         </div>
     </body>
