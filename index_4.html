@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Задание 4</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+        <style>
+            #main {
+                margin-top: 5%;
+                margin-left: auto;
+                margin-right: auto;
+                width: 400px;
+            }
+
+            input {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: 20px;
+                font-size: 20px;
+                font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+            }
+
+            button {
+                font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                margin-bottom: 20px;
+                color: #206cb3;
+                cursor: pointer;
+                font-size: 20px;
+                height: 40px;
+                border: 0;
+                border-radius: 20px;
+                background: #E1E3E0;
+            }
+
+            #calendar {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+            }
+
+            table {
+                font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+                text-align: center;
+                border-collapse: collapse;
+                border-spacing: 5px;
+                background: #E1E3E0;
+                border-radius: 20px;
+                margin: 50px auto;
+                margin-top: 0;
+            }
+
+            th {
+                font-size: 22px;
+                font-weight: 300;
+                padding: 12px 10px;
+                border-bottom: 2px solid #206cb3;
+                color: #206cb3;
+            }
+            
+            td {
+                font-size: 20px;
+                padding: 10px;
+                color: #8D8173;
+                cursor: pointer;
+            }
+
+            #modal {
+                display: none;
+                z-index: 1;
+                background-color: rgba(0, 0, 0, 0.8);
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                overflow: auto;
+            }
+
+            #modal-content {
+                background-color: white;
+                margin: 5% auto;
+                padding: 15px;
+                border: 1px solid grey;
+                width: 500px;
+            }
+
+            #close {
+                color: red;
+                font-size: 25px;
+                float: right;
+                background: none;
+                border: none;
+                cursor: pointer;
+            }
+
+            .red {
+                color: red;
+            }
+
+            p {
+                font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+                font-size: 20px;
+                text-align: center;
+            }
+
+            textarea {
+                display: block;
+                margin-left: auto;
+                margin-right: auto;
+                width: 400px;
+                height: 400px;
+                font-family: "Lucida Sans Unicode", "Lucida Grande", Sans-Serif;
+                font-size: 20px;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="main">
+            <input type="date">
+            <button>Сформировать календарь</button>
+            <div id="calendar"></div>
+        </div>
+        <div id="modal">
+            <div id="modal-content">
+                <button id="close">&times</button>
+                <p>Мероприятия на выбранный день</p>
+                <textarea></textarea>
+            </div>
+        </div>
+        <script>
+            "use strict";
+            class event {
+                constructor(date, info) {
+                    this.date = date;
+                    this.info = info;
+                }
+            }
+
+            var arrEvent = JSON.parse(localStorage.getItem('eventStorage'));
+            if (arrEvent == null) {
+                arrEvent = [];
+                arrEvent.push(new event(0, 0));
+            }
+            
+            var date_event = '';
+
+            $('#main button').on('click', function() {
+                var date = new Date($('input').val());
+                var day = date.getDate(),
+                    month = date.getMonth(),
+                    year =  date.getFullYear();
+
+                var date_1 = new Date(year, month);
+                var table = '<table><tr><th>Пн</th><th>Вт</th><th>Ср</th><th>Чт</th><th>Пт</th><th>Сб</th><th>Вс</th></tr><tr>';
+                
+                //  Вс - последний день недели
+                function getDay(date) {
+                    let day = date.getDay();
+                    if (day == 0) {
+                        day = 7;
+                    }
+                    return day - 1;
+                }
+                    
+                // пустые ячейки до первого дня месяца
+                for (let i = 0; i < getDay(date_1); i++) {
+                    table += '<td></td>';
+                }
+
+                while (date_1.getMonth() == month) {
+                    table += '<td>' + date_1.getDate() + '</td>';
+                    if (getDay(date_1) % 7 == 6) {     // если Вс
+                        table += '</tr><tr>';   // перевод строки
+                    }
+                    date_1.setDate(date_1.getDate() + 1);
+                }
+
+                // пустые ячейки после последнего дня месяца
+                if (getDay(date_1) != 0) {
+                    for (let i = getDay(date_1); i < 7; i++) {
+                        table += '<td></td>';
+                    }
+                }
+
+                table += '</tr></table>';
+
+                $('#calendar').html(table);
+
+                var td = $('table td');
+
+                for (let i = 0; i < td.length; i++) {
+                    date_event = String(year) + '/' + String(month) + '/' + td[i].innerHTML;
+
+                    $.each(arrEvent, function(key, value) {
+                        if (value.date == date_event) td[i].classList.add('red');
+                    })
+                }
+
+                for (let i = 0; i < td.length; i++) {
+                    
+                    td[i].onclick = () => {
+                        $('#modal').css('display', 'block');
+
+                        date_event = String(year) + '/' + String(month) + '/' + td[i].innerHTML;
+
+                        $.each(arrEvent, function(key, value) {
+                            if (value.date == date_event) {
+                                $('textarea').val(value.info);
+                                return false;
+                            }
+                            else {
+                                $('textarea').val('');
+                                td[i].classList.add('red');
+                            }
+                        })
+                        
+                        $('#close').on('click', function() {
+                            $('#modal').css('display', 'none');
+
+                            arrEvent.unshift(new event(date_event, $('textarea').val()));
+                            localStorage.setItem('eventStorage', JSON.stringify(arrEvent));
+                        })
+                    }
+                }
+            })
+        </script>
+    </body>
+</html>

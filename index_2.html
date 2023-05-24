@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Задание 2</title>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+        <style>
+            .calc {
+                width: 300px;
+                height: 500px;
+                border: 1px solid black;
+                border-radius: 20px;
+                background: #F5F5F5;
+                padding: 20px;
+                box-shadow: 4px 4px 4px grey;
+                margin: 50px auto;
+            }
+
+            .display {
+                height: 110px;
+                padding: 20px;
+                display: grid;
+                align-items: end;
+                margin-bottom: 10px;
+                text-align: right;
+                font-size: 64px;
+                font-family: "Quicksand", sans-serif;
+                overflow-y: auto;
+            }
+
+            button {
+                width: 60px;
+                height: 60px;
+                background: white;
+                border-radius: 50%;
+                font-size: 24px;
+                font-family: "Quicksand", sans-serif;
+                cursor: pointer;
+                box-shadow: 4px 4px 4px #d3d3d3;
+                border-color: white;
+            }
+
+            .buttons {
+                display: grid;
+                grid-template-areas: 
+                "c division mult his"
+                "seven eight nine minus"
+                "four five six plus"
+                "one two three equally"
+                "zero zero dot equally";
+                grid-gap: 10px;
+                justify-items: center;
+            }
+
+            button:hover {
+                filter: brightness(90%);
+            }
+
+            button:active {
+                filter: brightness(80%);
+            }
+
+            .blue {
+                color: #87CEFA;
+                font-weight: bold;
+            }
+
+            #equally {
+                background: #87CEFA;
+                color: white;
+                font-weight: bold;
+                grid-area: equally;
+                height: 100%;
+                border-radius: 35px;
+            }
+
+            #zero {
+                grid-area: zero;
+                width: 100%;
+                border-radius: 35px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="calc">
+            <div class="display"></div>
+            <div class="buttons">
+                <button id="c" class="blue">C</button>
+                <button id="division" class="blue">÷</button>
+                <button id="mult" class="blue">x</button>
+                <button id="his" class="blue">✉</button>
+
+                <button id="seven">7</button>
+                <button id="eight">8</button>
+                <button id="nine">9</button>
+                <button id="minus" class="blue">-</button>
+
+                <button id="four">4</button>
+                <button id="five">5</button>
+                <button id="six">6</button>
+                <button id="plus" class="blue">+</button>
+                
+                <button id="one">1</button>
+                <button id="two">2</button>
+                <button id="three">3</button>
+                <button id="equally">=</button>
+
+                <button id="zero">0</button>
+                <button id="dot">.</button>
+            </div>
+        </div>
+        <script>
+            "use strict";
+            var arr_result = JSON.parse(localStorage.getItem('storage_result'));
+            if (arr_result == null) arr_result = [];
+
+            var arr_eq = JSON.parse(localStorage.getItem('storage_eq'));
+            if (arr_eq == null) arr_eq = [];
+
+            var btn = $('.buttons button'),
+                operators = ['+', '-', 'x', '÷'],
+                float_num = false,
+                result,
+                storage_result = [],
+                storage_eq = [];
+
+            for (var i = 0; i < btn.length; i++) {
+                btn[i].onclick = function(e) {
+                    var input = document.querySelector('.display'),
+                        inputVal = input.innerHTML,
+                        Val = this.innerHTML;
+                
+                    if (Val == 'C') {
+                        input.innerHTML = '';
+                        float_num = false;
+                    }
+                    
+                    else if (Val == '=') {
+                        var eq = inputVal;
+                        var lastChar = eq[eq.length - 1];
+                    
+                        eq = eq.replace(/x/g, '*').replace(/÷/g, '/');
+                        
+                        if (operators.indexOf(lastChar) > -1 || lastChar == '.')
+                            eq = eq.replace(/.$/, '');
+                
+                        if (eq) {
+                            result = eval(eq);
+                            input.innerHTML = result;
+
+                            arr_eq.push(eq);
+                            localStorage.setItem('storage_eq', JSON.stringify(arr_eq));
+                            storage_eq = JSON.parse(localStorage.getItem('storage_eq'));
+
+                            arr_result.push(result);
+                            localStorage.setItem('storage_result', JSON.stringify(arr_result));
+                            storage_result = JSON.parse(localStorage.getItem('storage_result'));
+                        }
+
+                        float_num = false;
+                    }
+	
+                    else if (operators.indexOf(Val) > -1) {
+                        var lastChar = inputVal[inputVal.length - 1];
+                        
+                        // если входная строка не пустая и посл символ не оператор, то ставить выбраннй оператор можно 
+                        if (inputVal != '' && operators.indexOf(lastChar) == -1) 
+                            input.innerHTML += Val;
+                        
+                        // если входная строка пустая, то минус ставить можно
+                        else if (inputVal == '' && Val == '-') 
+                            input.innerHTML += Val;
+                        
+                        // если посл символ оператор и длина входной строки > 1, то заменяем на выбранный оператор
+                        if (operators.indexOf(lastChar) > -1 && inputVal.length > 1) {
+                            input.innerHTML = inputVal.replace(/.$/, Val);
+                        }
+                        
+                        float_num = false;
+                    }
+                
+                    else if (Val == '.') {
+                        if (!float_num) {
+                            input.innerHTML += Val;
+                            float_num = true;
+                        }
+                    }
+                    
+                    else if (Val == '✉') {
+                        input.innerHTML = '';
+                        for (var i = 0; i < storage_eq.length; i++) {
+                            input.innerHTML += storage_eq[i];
+                            input.innerHTML += '=';
+                            input.innerHTML += storage_result[i];
+                            input.innerHTML += '<br>';
+                        }
+                    }
+
+                    else {
+                        input.innerHTML += Val;
+                    }
+                } 
+            }
+
+            // ввод с клавиатуры
+            document.onkeydown = function(e) {
+
+                var key_press = String.fromCharCode(e.keyCode);
+                var key_code = e.keyCode;
+                var input = document.querySelector('.display');
+                var inputVal = input.innerHTML;
+                var Val = this.innerHTML;
+                var lastChar = inputVal[inputVal.length - 1];
+                var eq = inputVal;
+                eq = eq.replace(/x/g, '*').replace(/÷/g, '/');
+
+                if (key_press == 1) {
+                    input.innerHTML += key_press;
+                }
+                if (key_press == 2) {
+                    input.innerHTML += key_press; 
+                }
+                if (key_press == 3) {
+                    input.innerHTML += key_press; 
+                }
+                if (key_press == 4) {
+                    input.innerHTML += key_press; 
+                }
+                if (key_press == 5) {
+                    input.innerHTML += key_press; 
+                }
+                if (key_press == 6 ) {
+                    input.innerHTML += key_press; 
+                }
+                if (key_press == 7) {
+                    input.innerHTML += key_press; 
+                }
+                if (key_press == 8 && e.shiftKey == false) {
+                    input.innerHTML += key_press; 
+                }
+                if (key_press == 9 ) {
+                    input.innerHTML += key_press; 
+                }
+                if (key_press == 0 ) {
+                    input.innerHTML += key_press;
+                }
+            
+                if (inputVal != '' && operators.indexOf(lastChar) == -1 && key_code == 187 && e.shiftKey) {
+                    document.querySelector('.display').innerHTML += '+';
+                }
+                if (inputVal != '' && operators.indexOf(lastChar) == -1 && key_code == 189 && e.shiftKey == false) {
+                    document.querySelector('.display').innerHTML += '-';
+                }
+                if (inputVal != '' && operators.indexOf(lastChar) == -1 && key_code == 56 && e.shiftKey) {
+                    document.querySelector('.display').innerHTML += 'x';
+                }
+                if (inputVal != '' && operators.indexOf(lastChar) == -1 && key_code == 191) {
+                    document.querySelector('.display').innerHTML += '÷';
+                }
+                if (key_code == 187 && e.shiftKey == false) {
+                    result = eval(eq);
+                    input.innerHTML = result;
+                    
+                    float_num = false;
+
+                    arr_eq.push(eq);
+                    localStorage.setItem('storage_eq', JSON.stringify(arr_eq));
+                    storage_eq = JSON.parse(localStorage.getItem('storage_eq'));
+
+                    arr_result.push(result);
+                    localStorage.setItem('storage_result', JSON.stringify(arr_result));
+                    storage_result = JSON.parse(localStorage.getItem('storage_result'));
+                }
+                if (key_code == 8 || key_code == 46) {
+                    input.innerHTML = '';
+                    float_num = false;
+                }
+            }
+        </script>
+    </body>
+</html>
